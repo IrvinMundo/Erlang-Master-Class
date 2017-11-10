@@ -6,7 +6,8 @@
 -type expr() :: {'num',integer()} 
 	      | {'var',atom()} 
 	      | {'add', expr(), expr()} 
-	      | {'mul', expr(), expr()}.
+	      | {'mul', expr(), expr()}
+	      | {'divi', expr(), expr()}.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -21,7 +22,10 @@ print({var, A}) ->
 print({add, E1, E2}) ->
     "("++ print(E1) ++ "+" ++ print(E2) ++")";
 print({mul,E1,E2}) ->
-    "("++ print(E1) ++ "*" ++ print(E2) ++")".
+    "("++ print(E1) ++ "*" ++ print(E2) ++")";
+print({divi,E1,E2}) ->
+    "("++ print(E1) ++ "/" ++ print(E2) ++")".
+
 
 %%master:print({add,{num,2},{mul,{num,3},{num,4}}}).
 
@@ -35,7 +39,11 @@ eval({num, N}) ->
 eval({add, E1, E2}) ->
     eval(E1) + eval(E2);
 eval({mul, E1, E2}) ->
-    eval(E1) * eval(E2).
+    eval(E1) * eval(E2);
+eval({divi, E1, E2}) ->
+    eval(E1) div eval(E2).
+    
+
 
 %%master:eval({add,{num,2},{mul,{num,3},{num,4}}}).
 
@@ -53,7 +61,9 @@ eval(Env, {var, A}) ->
 eval(Env, {add, E1, E2}) ->
     eval(Env, E1) + eval(Env, E2);
 eval(Env, {mul, E1, E2}) ->
-    eval(Env, E1) * eval(Env, E2).
+    eval(Env, E1) * eval(Env, E2);
+eval(Env, {divi, E1, E2}) ->
+    eval(Env, E1) div eval(Env, E2).
 %%Busca el valor de la variable
 -spec lookup(atom(), env()) -> integer().
 lookup(A, [{A, V} | _]) ->
@@ -77,7 +87,8 @@ lookup(A, [_ | Rest]) ->
 -type instr() :: {'push', integer()}
               |  {'fetch', atom()}
               |  {'add2'}
-              |  {'mul2'}.
+              |  {'mul2'}
+	      |  {'divi2'}.
 
 -type program() :: [instr()].
 
@@ -92,7 +103,10 @@ compile({var, A}) ->
 compile({add, E1, E2}) ->
     compile(E1) ++ compile(E2) ++ [{add2}];
 compile({mul, E1, E2}) ->
-    compile(E1) ++ compile(E2) ++ [{mul2}].
+    compile(E1) ++ compile(E2) ++ [{mul2}];
+compile({divi, E1, E2}) ->
+    compile(E1) ++ compile(E2) ++ [{divi2}].
+
 
 
 %%prepara el programa,crea la pila y llama al run con tres parámetros
@@ -111,6 +125,8 @@ run([{add2} | Continue], Env, [N1, N2 | Stack]) ->
     run(Continue, Env, [(N1+N2) | Stack]);
 run([{mul2} | Continue], Env ,[N1, N2 | Stack]) ->
     run(Continue, Env, [(N1*N2) | Stack]);
+run([{divi2} | Continue], Env ,[N1, N2 | Stack]) ->
+    run(Continue, Env, [(N1 div N2) | Stack]);
 run([], _Env, [N]) ->
     N.
 

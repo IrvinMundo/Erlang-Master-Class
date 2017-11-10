@@ -126,7 +126,7 @@ run([{add2} | Continue], Env, [N1, N2 | Stack]) ->
 run([{mul2} | Continue], Env ,[N1, N2 | Stack]) ->
     run(Continue, Env, [(N1*N2) | Stack]);
 run([{divi2} | Continue], Env ,[N1, N2 | Stack]) ->
-    run(Continue, Env, [(N1 div N2) | Stack]);
+    run(Continue, Env, [(N2 div N1) | Stack]);
 run([], _Env, [N]) ->
     N.
 
